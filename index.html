@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Image Review Tool</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+font-family:Inter,sans-serif;
+background:linear-gradient(135deg,#0f172a,#1e293b);
+color:white;
+min-height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+
+/* HEADER */
+
+header{
+width:100%;
+padding:20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:rgba(0,0,0,0.3);
+backdrop-filter:blur(10px);
+}
+
+header h1{
+font-size:20px;
+font-weight:600;
+}
+
+/* FILE INPUT */
+
+.file{
+background:#2563eb;
+padding:8px 16px;
+border-radius:6px;
+cursor:pointer;
+}
+
+input[type=file]{
+display:none;
+}
+
+/* MAIN */
+
+main{
+width:100%;
+max-width:900px;
+padding:30px 20px;
+}
+
+/* CARD */
+
+.card{
+background:rgba(255,255,255,0.05);
+border-radius:16px;
+padding:25px;
+box-shadow:0 10px 30px rgba(0,0,0,0.5);
+backdrop-filter:blur(10px);
+text-align:center;
+}
+
+/* IMAGE */
+
+.image-box{
+background:#000;
+border-radius:12px;
+padding:10px;
+margin:15px 0;
+}
+
+img{
+max-width:100%;
+max-height:420px;
+border-radius:8px;
+}
+
+/* BUTTONS */
+
+.controls{
+display:flex;
+justify-content:center;
+gap:15px;
+flex-wrap:wrap;
+margin-top:10px;
+}
+
+button{
+padding:10px 18px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:14px;
+transition:0.25s;
+}
+
+.good{background:#22c55e;color:black}
+.good:hover{background:#16a34a}
+
+.bad{background:#ef4444}
+.bad:hover{background:#dc2626}
+
+.nav{background:#334155;color:white}
+.nav:hover{background:#475569}
+
+/* COUNTER */
+
+.counter{
+margin-top:10px;
+opacity:0.9;
+}
+
+/* STATS */
+
+.stats{
+display:flex;
+justify-content:center;
+gap:20px;
+flex-wrap:wrap;
+margin-top:20px;
+font-size:14px;
+}
+
+/* PROGRESS */
+
+.progress{
+height:6px;
+background:#1e293b;
+border-radius:10px;
+margin-top:15px;
+overflow:hidden;
+}
+
+.bar{
+height:100%;
+background:#22c55e;
+width:0%;
+transition:.3s;
+}
+
+/* EXPORT */
+
+.export{
+margin-top:20px;
+display:flex;
+justify-content:center;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.export button{
+background:#2563eb;
+}
+
+.export button:hover{
+background:#1d4ed8;
+}
+
+/* FOOTER */
+
+footer{
+margin-top:auto;
+padding:15px;
+font-size:12px;
+opacity:.6;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Image Review Tool</h1>
+
+<label class="file">
+Upload CSV
+<input type="file" id="csvFile" accept=".csv">
+</label>
+
+</header>
+
+<main>
+
+<div class="card" id="viewer" style="display:none">
+
+<h3>ID: <span id="carid"></span></h3>
+
+<div class="image-box">
+<img id="img">
+</div>
+
+<div class="controls">
+<button class="bad" onclick="mark('bad')">Bad (B)</button>
+<button class="good" onclick="mark('good')">Good (G)</button>
+</div>
+
+<div class="controls">
+<button class="nav" onclick="go(-1)">Prev</button>
+<div class="counter" id="counter"></div>
+<button class="nav" onclick="go(1)">Next</button>
+</div>
+
+<div class="progress">
+<div class="bar" id="progressBar"></div>
+</div>
+
+<div class="stats">
+<div>Total: <span id="total">0</span></div>
+<div>Reviewed: <span id="reviewed">0</span></div>
+<div>Good: <span id="good">0</span></div>
+<div>Bad: <span id="bad">0</span></div>
+</div>
+
+<div class="export">
+<button onclick="exportBad()">Export Bad CSV</button>
+<button onclick="exportAll()">Export All CSV</button>
+</div>
+
+</div>
+
+</main>
+
+<footer>
+CSV format: id,url
+</footer>
+
+<script>
+
+let DATA=[]
+let index=0
+let results={}
+
+document.getElementById("csvFile").addEventListener("change",loadCSV)
+
+function loadCSV(e){
+
+let file=e.target.files[0]
+let reader=new FileReader()
+
+reader.onload=function(){
+
+let rows=reader.result.trim().split("\n")
+DATA=[]
+
+for(let i=1;i<rows.length;i++){
+
+let cols=rows[i].split(",")
+
+DATA.push({
+id:cols[0].trim(),
+url:cols[1].trim()
+})
+
+}
+
+document.getElementById("viewer").style.display="block"
+index=0
+render()
+
+}
+
+reader.readAsText(file)
+
+}
+
+function render(){
+
+if(DATA.length===0)return
+
+let item=DATA[index]
+
+document.getElementById("img").src=item.url
+document.getElementById("carid").innerText=item.id
+document.getElementById("counter").innerText=(index+1)+" / "+DATA.length
+
+updateStats()
+
+}
+
+function mark(type){
+
+results[DATA[index].id]=type
+render()
+
+}
+
+function go(step){
+
+index+=step
+
+if(index<0)index=0
+if(index>=DATA.length)index=DATA.length-1
+
+render()
+
+}
+
+function updateStats(){
+
+let good=0
+let bad=0
+
+Object.values(results).forEach(v=>{
+if(v==="good")good++
+if(v==="bad")bad++
+})
+
+document.getElementById("total").innerText=DATA.length
+document.getElementById("reviewed").innerText=good+bad
+document.getElementById("good").innerText=good
+document.getElementById("bad").innerText=bad
+
+let progress=(good+bad)/DATA.length*100
+document.getElementById("progressBar").style.width=progress+"%"
+
+}
+
+function exportBad(){
+
+let rows=[["id","url"]]
+
+DATA.forEach(d=>{
+if(results[d.id]==="bad"){
+rows.push([d.id,d.url])
+}
+})
+
+download(rows,"bad_images.csv")
+
+}
+
+function exportAll(){
+
+let rows=[["id","url","result"]]
+
+DATA.forEach(d=>{
+rows.push([d.id,d.url,results[d.id]||""])
+})
+
+download(rows,"all_results.csv")
+
+}
+
+function download(rows,name){
+
+let csv=rows.map(r=>r.join(",")).join("\n")
+
+let blob=new Blob([csv])
+
+let a=document.createElement("a")
+a.href=URL.createObjectURL(blob)
+a.download=name
+a.click()
+
+}
+
+document.addEventListener("keydown",e=>{
+
+if(e.key==="ArrowRight")go(1)
+if(e.key==="ArrowLeft")go(-1)
+if(e.key==="g"||e.key==="G")mark("good")
+if(e.key==="b"||e.key==="B")mark("bad")
+
+})
+
+</script>
+
+</body>
+</html>
