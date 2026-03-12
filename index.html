@@ -21,8 +21,6 @@ flex-direction:column;
 align-items:center;
 }
 
-/* HEADER */
-
 header{
 width:100%;
 padding:20px;
@@ -38,8 +36,6 @@ font-size:20px;
 font-weight:600;
 }
 
-/* FILE INPUT */
-
 .file{
 background:#2563eb;
 padding:8px 16px;
@@ -51,15 +47,11 @@ input[type=file]{
 display:none;
 }
 
-/* MAIN */
-
 main{
 width:100%;
 max-width:900px;
 padding:30px 20px;
 }
-
-/* CARD */
 
 .card{
 background:rgba(255,255,255,0.05);
@@ -69,8 +61,6 @@ box-shadow:0 10px 30px rgba(0,0,0,0.5);
 backdrop-filter:blur(10px);
 text-align:center;
 }
-
-/* IMAGE */
 
 .image-box{
 background:#000;
@@ -84,8 +74,6 @@ max-width:100%;
 max-height:420px;
 border-radius:8px;
 }
-
-/* BUTTONS */
 
 .controls{
 display:flex;
@@ -113,14 +101,10 @@ transition:0.25s;
 .nav{background:#334155;color:white}
 .nav:hover{background:#475569}
 
-/* COUNTER */
-
 .counter{
 margin-top:10px;
 opacity:0.9;
 }
-
-/* STATS */
 
 .stats{
 display:flex;
@@ -130,8 +114,6 @@ flex-wrap:wrap;
 margin-top:20px;
 font-size:14px;
 }
-
-/* PROGRESS */
 
 .progress{
 height:6px;
@@ -148,8 +130,6 @@ width:0%;
 transition:.3s;
 }
 
-/* EXPORT */
-
 .export{
 margin-top:20px;
 display:flex;
@@ -165,8 +145,6 @@ background:#2563eb;
 .export button:hover{
 background:#1d4ed8;
 }
-
-/* FOOTER */
 
 footer{
 margin-top:auto;
@@ -290,7 +268,12 @@ updateStats()
 
 function mark(type){
 
-results[DATA[index].id]=type
+results[DATA[index].id] = type
+
+if(type === "good" && index < DATA.length - 1){
+index++
+}
+
 render()
 
 }
